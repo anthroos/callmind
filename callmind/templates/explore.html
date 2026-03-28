@@ -1,0 +1,269 @@
+{% extends "base.html" %}
+
+{% block title %}Knowledge Base — CallMind{% endblock %}
+
+{% block head %}
+<style>
+    .explore-hero {
+        text-align: center;
+        padding: 40px 0 24px;
+    }
+    .explore-hero h1 {
+        font-size: 28px;
+        font-weight: 900;
+        margin-bottom: 6px;
+    }
+    .explore-hero p {
+        color: var(--text-secondary);
+        font-size: 15px;
+    }
+
+    .kb-stats {
+        display: flex;
+        justify-content: center;
+        gap: 32px;
+        margin-bottom: 32px;
+        flex-wrap: wrap;
+    }
+    .kb-stat {
+        text-align: center;
+    }
+    .kb-stat-value {
+        font-size: 32px;
+        font-weight: 900;
+        font-family: "SF Mono", monospace;
+        color: var(--accent);
+    }
+    .kb-stat-label {
+        font-size: 12px;
+        color: var(--text-dim);
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+    }
+
+    .search-box {
+        max-width: 600px;
+        margin: 0 auto 32px;
+    }
+    .search-form {
+        display: flex;
+        gap: 10px;
+    }
+    .search-input {
+        flex: 1;
+        padding: 14px 20px;
+        background: var(--bg-card);
+        border: 2px solid var(--border);
+        border-radius: var(--radius);
+        font-size: 16px;
+        color: var(--text-primary);
+        box-shadow: var(--shadow);
+    }
+    .search-input:focus {
+        outline: none;
+        border-color: var(--accent);
+        box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.15);
+    }
+    .search-input::placeholder { color: var(--text-dim); }
+
+    .result-card {
+        background: var(--bg-card);
+        border: 1px solid var(--border);
+        border-radius: var(--radius-sm);
+        padding: 16px 20px;
+        margin-bottom: 10px;
+        display: flex;
+        gap: 16px;
+        align-items: flex-start;
+        box-shadow: var(--shadow);
+    }
+    .result-scores {
+        flex-shrink: 0;
+        text-align: center;
+        min-width: 70px;
+    }
+    .result-q {
+        font-size: 20px;
+        font-weight: 900;
+        font-family: "SF Mono", monospace;
+    }
+    .result-q.positive { color: var(--green); }
+    .result-q.negative { color: var(--red); }
+    .result-q.neutral { color: var(--text-dim); }
+    .result-vec {
+        font-size: 11px;
+        color: var(--text-dim);
+        margin-top: 2px;
+    }
+    .result-hybrid {
+        font-size: 10px;
+        color: var(--accent);
+        font-weight: 700;
+        margin-top: 4px;
+    }
+    .result-body { flex: 1; }
+    .result-content {
+        font-size: 15px;
+        line-height: 1.5;
+        margin-bottom: 6px;
+    }
+    .result-meta {
+        display: flex;
+        gap: 12px;
+        flex-wrap: wrap;
+        font-size: 12px;
+        color: var(--text-dim);
+    }
+    .result-tag {
+        display: inline-block;
+        font-size: 11px;
+        font-weight: 700;
+        text-transform: uppercase;
+        padding: 2px 8px;
+        border-radius: 4px;
+        background: rgba(99, 102, 241, 0.1);
+        color: var(--accent);
+    }
+    .result-client {
+        font-weight: 600;
+        color: var(--text-secondary);
+    }
+    .result-action {
+        font-size: 13px;
+        color: var(--green);
+        margin-top: 6px;
+        font-style: italic;
+    }
+
+    .empty-state {
+        text-align: center;
+        padding: 48px 0;
+        color: var(--text-dim);
+    }
+    .empty-state p { font-size: 15px; margin-bottom: 8px; }
+    .try-queries {
+        display: flex;
+        gap: 8px;
+        justify-content: center;
+        flex-wrap: wrap;
+        margin-top: 12px;
+    }
+    .try-query {
+        padding: 6px 14px;
+        background: var(--bg-hover);
+        border: 1px solid var(--border);
+        border-radius: 20px;
+        font-size: 13px;
+        color: var(--text-secondary);
+        cursor: pointer;
+        transition: all 0.15s;
+    }
+    .try-query:hover {
+        border-color: var(--accent);
+        color: var(--accent);
+    }
+
+    .api-hint {
+        max-width: 600px;
+        margin: 32px auto 0;
+        text-align: center;
+        padding: 16px;
+        background: var(--bg-primary);
+        border-radius: var(--radius-sm);
+        font-size: 13px;
+        color: var(--text-dim);
+    }
+    .api-hint code {
+        background: var(--bg-card);
+        padding: 2px 6px;
+        border-radius: 4px;
+        font-size: 12px;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="explore-hero">
+    <h1>Knowledge Base Explorer</h1>
+    <p>Search across all sources — video calls, CRM, email. Ranked by Q-value.</p>
+</div>
+
+<div class="kb-stats">
+    <div class="kb-stat">
+        <div class="kb-stat-value">{{ stats.total_memories }}</div>
+        <div class="kb-stat-label">Memories</div>
+    </div>
+    <div class="kb-stat">
+        <div class="kb-stat-value">{{ stats.total_clients }}</div>
+        <div class="kb-stat-label">Clients</div>
+    </div>
+    <div class="kb-stat">
+        <div class="kb-stat-value">{{ '%.2f'|format(stats.avg_q_value) }}</div>
+        <div class="kb-stat-label">Avg Q-Value</div>
+    </div>
+    <div class="kb-stat">
+        <div class="kb-stat-value">{{ stats.types|length }}</div>
+        <div class="kb-stat-label">Insight Types</div>
+    </div>
+</div>
+
+<div class="search-box">
+    <form class="search-form" action="/explore" method="get">
+        <input type="text" name="q" class="search-input"
+               placeholder="Search the knowledge base..."
+               value="{{ query }}" autofocus>
+        <button type="submit" class="btn btn-primary">Search</button>
+    </form>
+</div>
+
+{% if results %}
+<div class="results">
+    <p style="color: var(--text-dim); font-size: 13px; margin-bottom: 12px;">
+        {{ results|length }} results for "{{ query }}" — ranked by hybrid score (60% semantic + 40% Q-value)
+    </p>
+    {% for r in results %}
+    <div class="result-card">
+        <div class="result-scores">
+            <div class="result-q {% if r.q_value > 0 %}positive{% elif r.q_value < 0 %}negative{% else %}neutral{% endif %}">
+                {{ '%.2f'|format(r.q_value) }}
+            </div>
+            <div class="result-vec">sim: {{ '%.2f'|format(r.vector_score) }}</div>
+            <div class="result-hybrid">H: {{ '%.2f'|format(r.hybrid_score) }}</div>
+        </div>
+        <div class="result-body">
+            <div class="result-content">{{ r.content }}</div>
+            {% if r.action_point %}
+            <div class="result-action">→ {{ r.action_point }}</div>
+            {% endif %}
+            <div class="result-meta">
+                <span class="result-tag">{{ r.type }}</span>
+                <span class="result-client">{{ r.client_id.replace('_', ' ').title() }}</span>
+                {% if r.call_date %}<span>{{ r.call_date }}</span>{% endif %}
+            </div>
+        </div>
+    </div>
+    {% endfor %}
+</div>
+{% elif query %}
+<div class="empty-state">
+    <p>No results for "{{ query }}"</p>
+</div>
+{% else %}
+<div class="empty-state">
+    <p>Try searching for sales insights across all your data sources</p>
+    <div class="try-queries">
+        <a href="/explore?q=budget+concerns" class="try-query">budget concerns</a>
+        <a href="/explore?q=body+language+negative" class="try-query">body language</a>
+        <a href="/explore?q=decision+maker" class="try-query">decision maker</a>
+        <a href="/explore?q=objections" class="try-query">objections</a>
+        <a href="/explore?q=next+steps" class="try-query">next steps</a>
+    </div>
+</div>
+{% endif %}
+
+<div class="api-hint">
+    API: <code>GET /api/memory/search?q=your+query</code> ·
+    <code>POST /api/memory/add</code> ·
+    <code>GET /api/memory/stats</code>
+</div>
+{% endblock %}

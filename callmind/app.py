@@ -51,6 +51,7 @@ async def startup():
     """Ensure Qdrant collection exists on startup."""
     logger.info("CallMind starting up...")
     memory.ensure_collection()
+    memory.rebuild_q_cache()
     if UNKEY_ROOT_KEY:
         logger.info("Unkey auth enabled (API ID: %s)", UNKEY_API_ID)
     else:
@@ -244,6 +245,49 @@ async def api_insights(
 
     insights = memory.get_client_insights(client_id, query=q, limit=50)
     return JSONResponse(content={"client_id": client_id, "insights": insights})
+
+
+@app.get("/explore", response_class=HTMLResponse)
+async def explore(request: Request, q: str = ""):
+    """Knowledge base explorer — search across all sources."""
+    results = []
+    stats = memory.get_stats()
+    if q:
+        results = memory.search_all(q, limit=20)
+    return templates.TemplateResponse(request=request, name="explore.html", context={
+        "query": q,
+        "results": results,
+        "stats": stats,
+    })
+
+
+@app.get("/api/memory/search")
+async def api_memory_search(q: str = "", limit: int = 20):
+    """Search the knowledge base across all clients and sources."""
+    if not q:
+        return JSONResponse(content={"error": "Query parameter 'q' required"}, status_code=400)
+    results = memory.search_all(q, limit=limit)
+    stats = memory.get_stats()
+    return JSONResponse(content={"query": q, "results": results, "stats": stats})
+
+
+@app.post("/api/memory/add")
+async def api_memory_add(
+    content: str = Form(...),
+    memory_type: str = Form("note"),
+    client_id: str = Form("global"),
+    source: str = Form("manual"),
+):
+    """Add a memory to the knowledge base."""
+    point_id = memory.add_memory(content, memory_type, client_id, source)
+    return JSONResponse(content={"id": point_id, "status": "stored"})
+
+
+@app.get("/api/memory/stats")
+async def api_memory_stats():
+    """Get knowledge base statistics."""
+    stats = memory.get_stats()
+    return JSONResponse(content=stats)
 
 
 def _run_pipeline(source: str, client_id: str, call_date: str, job_id: str):

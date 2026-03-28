@@ -443,6 +443,153 @@ def update_q_values(client_id: str, outcome: str, reward: float) -> dict[str, An
     }
 
 
+def search_all(query: str, limit: int = 20, source: str = "") -> list[dict[str, Any]]:
+    """Search across ALL clients and sources. This is the OpenExp-style endpoint.
+
+    Returns insights ranked by hybrid score (vector similarity + Q-value).
+    """
+    qc = _get_qdrant()
+    _load_q_cache()
+
+    query_vector = _embed(query)
+
+    # Optional source filter
+    qdrant_filter = None
+    if source:
+        qdrant_filter = Filter(must=[
+            FieldCondition(key="insight_type", match=MatchValue(value=source)),
+        ])
+
+    search_result = qc.query_points(
+        collection_name=COLLECTION_NAME,
+        query=query_vector,
+        query_filter=qdrant_filter,
+        limit=limit * 2,
+        with_payload=True,
+    )
+
+    results = []
+    for point in search_result.points:
+        payload = point.payload or {}
+        q_data = _q_cache.get(str(point.id), {"q_value": Q_INIT, "q_visits": 0})
+        q_val = q_data.get("q_value", Q_INIT)
+
+        # Hybrid score
+        vec_score = point.score
+        hybrid = 0.6 * vec_score + 0.4 * max(0, q_val)
+
+        results.append({
+            "id": str(point.id),
+            "content": payload.get("memory", ""),
+            "type": payload.get("insight_type", "insight"),
+            "client_id": payload.get("client_id", ""),
+            "source": payload.get("source_video", "callmind"),
+            "call_date": payload.get("call_date", ""),
+            "vector_score": round(vec_score, 3),
+            "q_value": round(q_val, 3),
+            "hybrid_score": round(hybrid, 3),
+            "action_point": payload.get("action_point", ""),
+        })
+
+    results.sort(key=lambda x: x["hybrid_score"], reverse=True)
+    return results[:limit]
+
+
+def add_memory(content: str, memory_type: str = "note", client_id: str = "global", source: str = "manual") -> str:
+    """Add a single memory to the knowledge base. OpenExp-compatible endpoint."""
+    qc = _get_qdrant()
+    _load_q_cache()
+
+    vector = _embed(f"[{memory_type}] {content}")
+    point_id = str(uuid.uuid4())
+    now = datetime.now(timezone.utc).isoformat()
+
+    payload = {
+        "memory": content,
+        "client_id": client_id,
+        "insight_type": memory_type,
+        "confidence": 0.8,
+        "source_video": source,
+        "call_date": now[:10],
+        "created_at": now,
+        "status": "active",
+    }
+
+    qc.upsert(collection_name=COLLECTION_NAME, points=[
+        PointStruct(id=point_id, vector=vector, payload=payload),
+    ])
+
+    _q_cache[point_id] = {
+        "q_value": Q_INIT,
+        "q_visits": 0,
+        "client_id": client_id,
+        "insight_type": memory_type,
+    }
+    _save_q_cache()
+
+    return point_id
+
+
+def get_stats() -> dict[str, Any]:
+    """Get knowledge base statistics."""
+    _load_q_cache()
+    total = len(_q_cache)
+    q_vals = [d.get("q_value", 0) for d in _q_cache.values()]
+    types = {}
+    clients = set()
+    for d in _q_cache.values():
+        t = d.get("insight_type", "unknown")
+        types[t] = types.get(t, 0) + 1
+        clients.add(d.get("client_id", "unknown"))
+
+    return {
+        "total_memories": total,
+        "total_clients": len(clients),
+        "avg_q_value": round(sum(q_vals) / len(q_vals), 3) if q_vals else 0,
+        "max_q_value": round(max(q_vals), 3) if q_vals else 0,
+        "min_q_value": round(min(q_vals), 3) if q_vals else 0,
+        "types": types,
+    }
+
+
+def rebuild_q_cache() -> int:
+    """Rebuild Q-cache from Qdrant data. Used when cache is lost."""
+    global _q_cache
+    qc = _get_qdrant()
+
+    offset = None
+    count = 0
+    while True:
+        scroll_result = qc.scroll(
+            collection_name=COLLECTION_NAME,
+            limit=100,
+            with_payload=True,
+            with_vectors=False,
+            offset=offset,
+        )
+        points, next_offset = scroll_result
+
+        for point in points:
+            pid = str(point.id)
+            if pid not in _q_cache:
+                payload = point.payload or {}
+                _q_cache[pid] = {
+                    "q_value": Q_INIT,
+                    "q_visits": 0,
+                    "client_id": payload.get("client_id", "unknown"),
+                    "insight_type": payload.get("insight_type", "insight"),
+                }
+                count += 1
+
+        if next_offset is None:
+            break
+        offset = next_offset
+
+    _save_q_cache()
+    logger.info("Rebuilt Q-cache: %d new entries (total: %d)", count, len(_q_cache))
+    return count
+
+
 def get_insight_by_id(insight_id: str) -> dict[str, Any] | None:
     """Get a single insight by its Qdrant point ID."""
     qc = _get_qdrant()

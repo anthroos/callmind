@@ -21,6 +21,7 @@ services:
       - qdrant
     volumes:
       - ./uploads:/app/uploads
+      - ./q_cache.json:/app/q_cache.json
     restart: unless-stopped
 
 volumes:

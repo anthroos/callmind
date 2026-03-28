@@ -1,139 +1,234 @@
 {% extends "base.html" %}
 
-{% block title %}CallMind — Demo{% endblock %}
+{% block title %}CallMind — Architecture{% endblock %}
+
+{% block head %}
+<style>
+    .demo-hero {
+        text-align: center;
+        padding: 48px 0 24px;
+    }
+    .demo-hero h1 {
+        font-size: 32px;
+        font-weight: 900;
+        margin-bottom: 8px;
+    }
+    .demo-hero p {
+        font-size: 18px;
+        color: var(--text-secondary);
+        max-width: 600px;
+        margin: 0 auto;
+        line-height: 1.5;
+    }
+
+    /* SVG Diagram */
+    .diagram-wrapper {
+        max-width: 900px;
+        margin: 0 auto 48px;
+        background: var(--bg-card);
+        border: 1px solid var(--border);
+        border-radius: var(--radius);
+        padding: 40px 24px;
+        box-shadow: var(--shadow);
+    }
+    .diagram-wrapper svg {
+        width: 100%;
+        height: auto;
+    }
+
+    /* Bottom links */
+    .demo-links {
+        text-align: center;
+        padding: 24px 0 48px;
+        display: flex;
+        gap: 16px;
+        justify-content: center;
+        flex-wrap: wrap;
+    }
+    .demo-links a {
+        padding: 14px 28px;
+        font-size: 15px;
+    }
+
+    /* Key insight */
+    .demo-insight {
+        max-width: 700px;
+        margin: 0 auto 32px;
+        text-align: center;
+        padding: 24px;
+        background: rgba(99, 102, 241, 0.04);
+        border: 1px solid rgba(99, 102, 241, 0.2);
+        border-radius: var(--radius);
+    }
+    .demo-insight h3 {
+        font-size: 18px;
+        color: var(--accent);
+        margin-bottom: 8px;
+    }
+    .demo-insight p {
+        font-size: 15px;
+        color: var(--text-secondary);
+        line-height: 1.6;
+    }
+
+    /* Sponsors bar */
+    .sponsors-bar {
+        display: flex;
+        justify-content: center;
+        gap: 32px;
+        padding: 20px 0;
+        margin-top: 16px;
+    }
+    .sponsor-item {
+        text-align: center;
+        font-size: 13px;
+        color: var(--text-dim);
+    }
+    .sponsor-item strong {
+        display: block;
+        font-size: 15px;
+        color: var(--text-primary);
+        margin-bottom: 2px;
+    }
+</style>
+{% endblock %}
 
 {% block content %}
-<section class="hero">
-    <h1>CallMind</h1>
-    <p class="hero-sub">Video Intelligence with Q-Learning for Sales</p>
-</section>
+<div class="demo-hero">
+    <h1>Unified Sales Intelligence</h1>
+    <p>One knowledge base that connects all your sales data sources. Q-learning ranks what actually closes deals.</p>
+</div>
 
-<!-- Problem -->
-<div class="demo-section">
-    <h2>The Problem</h2>
-    <div class="demo-grid">
-        <div class="demo-card">
-            <div class="demo-num">80%</div>
-            <p>of sales call insights are lost within 24 hours</p>
-        </div>
-        <div class="demo-card">
-            <div class="demo-num">0%</div>
-            <p>of tools read body language from video calls</p>
-        </div>
-        <div class="demo-card">
-            <div class="demo-num">0</div>
-            <p>feedback loops that learn what actually closes deals</p>
-        </div>
+<div class="diagram-wrapper">
+    <svg viewBox="0 0 840 520" xmlns="http://www.w3.org/2000/svg">
+        <defs>
+            <marker id="arrow" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto">
+                <path d="M0,0 L8,3 L0,6" fill="#6366f1"/>
+            </marker>
+            <marker id="arrow-green" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto">
+                <path d="M0,0 L8,3 L0,6" fill="#16a34a"/>
+            </marker>
+            <marker id="arrow-amber" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto">
+                <path d="M0,0 L8,3 L0,6" fill="#d97706"/>
+            </marker>
+            <filter id="shadow">
+                <feDropShadow dx="0" dy="2" stdDeviation="4" flood-opacity="0.08"/>
+            </filter>
+        </defs>
+
+        <!-- ═══ CORE: Qdrant + Q-Learning ═══ -->
+        <rect x="270" y="220" width="300" height="100" rx="16" fill="#f0fdf4" stroke="#16a34a" stroke-width="2" filter="url(#shadow)"/>
+        <text x="420" y="255" text-anchor="middle" font-size="20" font-weight="900" fill="#1a1a2e">Qdrant + Q-Learning</text>
+        <text x="420" y="278" text-anchor="middle" font-size="13" fill="#5a5a78">Vector Knowledge Base</text>
+        <text x="420" y="298" text-anchor="middle" font-size="12" fill="#16a34a" font-weight="700">DigitalOcean</text>
+
+        <!-- ═══ TOP: AI Agent ═══ -->
+        <rect x="310" y="20" width="220" height="70" rx="12" fill="#f5f3ff" stroke="#7c3aed" stroke-width="2" filter="url(#shadow)"/>
+        <text x="420" y="52" text-anchor="middle" font-size="17" font-weight="800" fill="#1a1a2e">Claude Code</text>
+        <text x="420" y="72" text-anchor="middle" font-size="12" fill="#5a5a78">AI Agent — orchestrates everything</text>
+
+        <!-- Arrow: Agent → Core -->
+        <line x1="420" y1="90" x2="420" y2="218" stroke="#7c3aed" stroke-width="2" stroke-dasharray="6,4" marker-end="url(#arrow)"/>
+        <text x="432" y="160" font-size="11" fill="#7c3aed" font-weight="600">reads &amp; writes</text>
+
+        <!-- ═══ LEFT SOURCES ═══ -->
+
+        <!-- CallMind (highlighted) -->
+        <rect x="20" y="120" width="180" height="80" rx="12" fill="rgba(99,102,241,0.06)" stroke="#6366f1" stroke-width="2" filter="url(#shadow)"/>
+        <text x="110" y="150" text-anchor="middle" font-size="15" font-weight="800" fill="#1a1a2e">CallMind</text>
+        <text x="110" y="168" text-anchor="middle" font-size="11" fill="#5a5a78">Video Intelligence</text>
+        <text x="110" y="184" text-anchor="middle" font-size="10" fill="#6366f1" font-weight="600">3-channel Gemini</text>
+
+        <!-- CRM -->
+        <rect x="20" y="230" width="180" height="70" rx="12" fill="#fff" stroke="#e2e4ea" stroke-width="1.5" filter="url(#shadow)"/>
+        <text x="110" y="260" text-anchor="middle" font-size="15" font-weight="700" fill="#1a1a2e">CRM</text>
+        <text x="110" y="278" text-anchor="middle" font-size="11" fill="#5a5a78">Deals, clients, pipeline</text>
+
+        <!-- Email -->
+        <rect x="20" y="330" width="180" height="70" rx="12" fill="#fff" stroke="#e2e4ea" stroke-width="1.5" filter="url(#shadow)"/>
+        <text x="110" y="360" text-anchor="middle" font-size="15" font-weight="700" fill="#1a1a2e">Email</text>
+        <text x="110" y="378" text-anchor="middle" font-size="11" fill="#5a5a78">Gmail conversations</text>
+
+        <!-- Arrows: Sources → Core -->
+        <path d="M200,160 Q240,160 270,240" fill="none" stroke="#6366f1" stroke-width="2" marker-end="url(#arrow)"/>
+        <path d="M200,265 L268,265" fill="none" stroke="#6366f1" stroke-width="1.5" marker-end="url(#arrow)"/>
+        <path d="M200,365 Q240,365 270,290" fill="none" stroke="#6366f1" stroke-width="1.5" marker-end="url(#arrow)"/>
+
+        <!-- ═══ RIGHT: Outputs ═══ -->
+
+        <!-- Call Prep -->
+        <rect x="640" y="120" width="180" height="80" rx="12" fill="#fff" stroke="#e2e4ea" stroke-width="1.5" filter="url(#shadow)"/>
+        <text x="730" y="150" text-anchor="middle" font-size="15" font-weight="700" fill="#1a1a2e">Call Prep</text>
+        <text x="730" y="168" text-anchor="middle" font-size="11" fill="#5a5a78">Ranked by Q-value</text>
+        <text x="730" y="184" text-anchor="middle" font-size="10" fill="#16a34a" font-weight="600">Best insights first</text>
+
+        <!-- API / MCP -->
+        <rect x="640" y="230" width="180" height="70" rx="12" fill="#fff" stroke="#e2e4ea" stroke-width="1.5" filter="url(#shadow)"/>
+        <text x="730" y="258" text-anchor="middle" font-size="15" font-weight="700" fill="#1a1a2e">REST API</text>
+        <text x="730" y="276" text-anchor="middle" font-size="11" fill="#5a5a78">Unkey authenticated</text>
+
+        <!-- Strategy -->
+        <rect x="640" y="330" width="180" height="70" rx="12" fill="#fff" stroke="#e2e4ea" stroke-width="1.5" filter="url(#shadow)"/>
+        <text x="730" y="358" text-anchor="middle" font-size="15" font-weight="700" fill="#1a1a2e">Deal Strategy</text>
+        <text x="730" y="376" text-anchor="middle" font-size="11" fill="#5a5a78">Data-driven next steps</text>
+
+        <!-- Arrows: Core → Outputs -->
+        <path d="M570,240 Q600,160 638,160" fill="none" stroke="#16a34a" stroke-width="2" marker-end="url(#arrow-green)"/>
+        <path d="M572,265 L638,265" fill="none" stroke="#16a34a" stroke-width="1.5" marker-end="url(#arrow-green)"/>
+        <path d="M570,290 Q600,365 638,365" fill="none" stroke="#16a34a" stroke-width="1.5" marker-end="url(#arrow-green)"/>
+
+        <!-- ═══ BOTTOM: Q-Learning Loop ═══ -->
+        <rect x="270" y="380" width="300" height="70" rx="12" fill="#fffbeb" stroke="#d97706" stroke-width="2" filter="url(#shadow)"/>
+        <text x="420" y="410" text-anchor="middle" font-size="16" font-weight="800" fill="#1a1a2e">Deal Outcomes</text>
+        <text x="420" y="430" text-anchor="middle" font-size="12" fill="#5a5a78">Won / Lost / Progressed → reward signal</text>
+
+        <!-- Loop arrow: Outcomes → Core -->
+        <path d="M420,380 L420,322" fill="none" stroke="#d97706" stroke-width="2.5" marker-end="url(#arrow-amber)"/>
+        <text x="432" y="356" font-size="11" fill="#d97706" font-weight="700">Q-update</text>
+
+        <!-- Loop visualization -->
+        <path d="M570,300 Q600,440 530,450 L510,450" fill="none" stroke="#d97706" stroke-width="1.5" stroke-dasharray="4,3"/>
+        <path d="M270,300 Q240,440 310,450 L330,450" fill="none" stroke="#d97706" stroke-width="1.5" stroke-dasharray="4,3"/>
+
+        <!-- Labels -->
+        <text x="60" y="112" font-size="11" fill="#6366f1" font-weight="700" text-transform="uppercase" letter-spacing="1">DATA SOURCES</text>
+        <text x="670" y="112" font-size="11" fill="#16a34a" font-weight="700" text-transform="uppercase" letter-spacing="1">OUTPUTS</text>
+
+        <!-- Q-value examples -->
+        <text x="420" y="490" text-anchor="middle" font-size="12" fill="#5a5a78">
+            <tspan font-weight="700" fill="#16a34a">Q: 0.375</tspan> deal won ·
+            <tspan font-weight="700" fill="#8c8ca8">Q: 0.000</tspan> new ·
+            <tspan font-weight="700" fill="#dc2626">Q: -0.125</tspan> deal lost
+        </text>
+        <text x="420" y="510" text-anchor="middle" font-size="11" fill="#8c8ca8">Q = Q + 0.25 × reward  ·  insights that predict success rise to the top</text>
+    </svg>
+</div>
+
+<div class="demo-insight">
+    <h3>What makes this different?</h3>
+    <p>Every piece of sales data — video calls, CRM updates, emails — flows into one vector knowledge base.
+    Q-learning creates a <strong>feedback loop</strong>: record deal outcomes, and the system learns which
+    signals actually predicted success. Your AI agent always has the most relevant, empirically-ranked context.</p>
+</div>
+
+<div class="sponsors-bar">
+    <div class="sponsor-item">
+        <strong>Gemini 2.5 Flash</strong>
+        3-channel multimodal video
+    </div>
+    <div class="sponsor-item">
+        <strong>Unkey</strong>
+        API key management
+    </div>
+    <div class="sponsor-item">
+        <strong>DigitalOcean</strong>
+        Production deployment
     </div>
 </div>
 
-<!-- Architecture -->
-<div class="demo-section">
-    <h2>Architecture</h2>
-    <div class="demo-arch">
-        <div class="demo-arch-row">
-            <div class="demo-arch-box demo-agent">
-                <div class="demo-arch-label">AI Agent</div>
-                <strong>Claude Code</strong>
-                <p>Orchestrates everything</p>
-            </div>
-        </div>
-        <div class="demo-arch-arrows">&#8595; &nbsp; &#8595; &nbsp; &#8595;</div>
-        <div class="demo-arch-row">
-            <div class="demo-arch-box">
-                <div class="demo-arch-label">Block 1</div>
-                <strong>CRM</strong>
-                <p>Clients, deals, pipeline</p>
-            </div>
-            <div class="demo-arch-box demo-highlight">
-                <div class="demo-arch-label">Block 2</div>
-                <strong>CallMind</strong>
-                <p>Video analysis<br>3 AI channels</p>
-            </div>
-            <div class="demo-arch-box">
-                <div class="demo-arch-label">Block 3</div>
-                <strong>Email</strong>
-                <p>Gmail integration</p>
-            </div>
-        </div>
-        <div class="demo-arch-arrows">&#8595; &nbsp; &#8595; &nbsp; &#8595;</div>
-        <div class="demo-arch-row">
-            <div class="demo-arch-box demo-core">
-                <div class="demo-arch-label">Core</div>
-                <strong>Qdrant + Q-Learning</strong>
-                <p>Vector memory that learns from outcomes</p>
-            </div>
-        </div>
-    </div>
-</div>
-
-<!-- 3 Channels -->
-<div class="demo-section">
-    <h2>3-Channel Parallel Analysis</h2>
-    <div class="demo-grid">
-        <div class="demo-card">
-            <div class="demo-icon">&#128172;</div>
-            <h3>Channel 1: Transcript</h3>
-            <p>What they <strong>said</strong><br>Pain points, objections, budget signals, timelines</p>
-        </div>
-        <div class="demo-card">
-            <div class="demo-icon">&#128064;</div>
-            <h3>Channel 2: Visual</h3>
-            <p>How they <strong>behaved</strong><br>Body language, micro-expressions, engagement</p>
-        </div>
-        <div class="demo-card demo-fusion">
-            <div class="demo-icon">&#9889;</div>
-            <h3>Channel 3: Fusion</h3>
-            <p>Where they <strong>contradict</strong><br>"Said yes but crossed arms and looked away"</p>
-        </div>
-    </div>
-</div>
-
-<!-- Q-Learning -->
-<div class="demo-section">
-    <h2>Q-Learning: Memory That Learns</h2>
-    <div class="demo-qlearn">
-        <div class="demo-formula">
-            Q<sub>new</sub> = Q<sub>old</sub> + 0.25 &times; reward
-        </div>
-        <div class="demo-grid">
-            <div class="demo-card">
-                <div class="demo-q-val q-positive">Q: 0.375</div>
-                <p><strong>Deal Won</strong><br>Insights that predicted success rise</p>
-            </div>
-            <div class="demo-card">
-                <div class="demo-q-val q-zero">Q: 0.000</div>
-                <p><strong>New Client</strong><br>No outcome data yet</p>
-            </div>
-            <div class="demo-card">
-                <div class="demo-q-val q-negative">Q: -0.125</div>
-                <p><strong>Deal Lost</strong><br>Misleading signals get demoted</p>
-            </div>
-        </div>
-    </div>
-</div>
-
-<!-- Sponsors -->
-<div class="demo-section">
-    <h2>Built With</h2>
-    <div class="demo-grid">
-        <div class="demo-card">
-            <h3>Gemini 2.5 Flash</h3>
-            <p>Native multimodal video understanding. 3 parallel queries on one upload.</p>
-        </div>
-        <div class="demo-card">
-            <h3>Unkey</h3>
-            <p>API key management. Register, verify, authenticate — all via v2 REST.</p>
-        </div>
-        <div class="demo-card">
-            <h3>DigitalOcean</h3>
-            <p>Production deployment. Docker Compose: Qdrant + FastAPI on a Droplet.</p>
-        </div>
-    </div>
-</div>
-
-<div class="demo-cta">
-    <a href="/" class="btn btn-primary">Try Live Demo &rarr;</a>
+<div class="demo-links">
+    <a href="/" class="btn btn-primary">Live Demo</a>
     <a href="https://github.com/anthroos/callmind" class="btn btn-secondary" target="_blank">GitHub</a>
+    <a href="https://codeables.dev/skills/anthroos/callmind" class="btn btn-secondary" target="_blank">Shipables</a>
 </div>
 {% endblock %}
