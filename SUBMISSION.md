@@ -51,6 +51,9 @@ All insights are embedded and stored in **Qdrant vector memory** with **Q-learni
 Gemini 2.5 Flash, Qdrant, FastEmbed, Unkey, DigitalOcean, FastAPI, Python, Docker
 
 ## Links
-- **GitHub**: https://github.com/anthroos/callmind
-- **Live Demo**: [TODO: DigitalOcean URL]
+- **GitHub (CallMind)**: https://github.com/anthroos/callmind
+- **GitHub (OpenExp)**: https://github.com/anthroos/openexp
+- **Live Demo**: http://165.232.137.159:8000/demo
+- **Knowledge Base Explorer**: http://165.232.137.159:8000/explore
+- **Shipables Skill**: https://shipables.dev/skills/anthroos%2Fcallmind
 - **Video Demo**: [TODO]
