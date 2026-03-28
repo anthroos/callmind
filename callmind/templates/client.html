@@ -1,0 +1,137 @@
+{% extends "base.html" %}
+
+{% block title %}{{ client_name }} — CallMind{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <div>
+        <h1>{{ client_name }}</h1>
+        <p class="page-sub">{{ stats.total }} insights across {{ stats.types }} categories</p>
+    </div>
+    <div class="header-actions">
+        <a href="/client/{{ client_id }}/prep" class="btn btn-primary">Prep for Call</a>
+        <a href="/" class="btn btn-ghost">Back</a>
+    </div>
+</div>
+
+<!-- Stats Bar -->
+<div class="stats-bar">
+    <div class="stat">
+        <span class="stat-value">{{ stats.total }}</span>
+        <span class="stat-label">Total Insights</span>
+    </div>
+    <div class="stat">
+        <span class="stat-value">{{ stats.types }}</span>
+        <span class="stat-label">Categories</span>
+    </div>
+    <div class="stat">
+        <span class="stat-value {% if stats.avg_q > 0.3 %}text-green{% elif stats.avg_q > 0 %}text-amber{% else %}text-dim{% endif %}">
+            {{ '%.3f'|format(stats.avg_q) }}
+        </span>
+        <span class="stat-label">Avg Q-Value</span>
+    </div>
+    <div class="stat">
+        <span class="stat-value text-green">{{ '%.3f'|format(stats.max_q) }}</span>
+        <span class="stat-label">Max Q</span>
+    </div>
+    <div class="stat">
+        <span class="stat-value text-red">{{ '%.3f'|format(stats.min_q) }}</span>
+        <span class="stat-label">Min Q</span>
+    </div>
+</div>
+
+<!-- Search -->
+<div class="search-bar">
+    <form action="/client/{{ client_id }}" method="get" class="search-form">
+        <input type="text" name="q" value="{{ query }}"
+               placeholder="Search insights..." class="search-input">
+        <button type="submit" class="btn btn-secondary">Search</button>
+    </form>
+</div>
+
+<!-- Outcome Recording -->
+<div class="card outcome-card">
+    <h3>Record Deal Outcome</h3>
+    <p class="card-hint">When a deal progresses or stalls, record the outcome. Q-learning updates all insights for this client.</p>
+    <form action="/client/{{ client_id }}/outcome" method="post" class="outcome-form">
+        <select name="outcome" class="form-select" required>
+            <option value="">Select outcome...</option>
+            <option value="deal_won">Deal Won</option>
+            <option value="deal_progressed">Deal Progressed (next stage)</option>
+            <option value="meeting_booked">Follow-up Meeting Booked</option>
+            <option value="proposal_sent">Proposal Sent</option>
+            <option value="deal_stalled">Deal Stalled</option>
+            <option value="deal_lost">Deal Lost</option>
+            <option value="ghosted">Prospect Ghosted</option>
+        </select>
+        <select name="reward" class="form-select" required>
+            <option value="">Reward signal...</option>
+            <option value="1.0">Strong positive (+1.0)</option>
+            <option value="0.5">Positive (+0.5)</option>
+            <option value="0.25">Slight positive (+0.25)</option>
+            <option value="0">Neutral (0)</option>
+            <option value="-0.25">Slight negative (-0.25)</option>
+            <option value="-0.5">Negative (-0.5)</option>
+            <option value="-1.0">Strong negative (-1.0)</option>
+        </select>
+        <button type="submit" class="btn btn-secondary">Apply Reward</button>
+    </form>
+</div>
+
+<!-- Insights by Category -->
+{% for type_name, type_insights in by_type.items() %}
+<div class="card insight-category">
+    <h2 class="category-title">
+        <span class="category-dot {{ type_name }}"></span>
+        {{ type_name.replace('_', ' ').title() }}
+        <span class="category-count">{{ type_insights|length }}</span>
+    </h2>
+    <div class="insight-list">
+        {% for insight in type_insights %}
+        <div class="insight-item">
+            <div class="insight-content">
+                <p class="insight-text">{{ insight.content }}</p>
+                {% if insight.quote %}
+                <blockquote class="insight-quote">&ldquo;{{ insight.quote }}&rdquo;</blockquote>
+                {% endif %}
+                {% if insight.action_point %}
+                <div class="action-point">&#9889; {{ insight.action_point }}</div>
+                {% endif %}
+                <div class="insight-meta">
+                    <span class="confidence-badge" title="Extraction confidence">
+                        {{ '%.0f'|format(insight.confidence * 100) }}% confident
+                    </span>
+                    {% if insight.source_video %}
+                    <span class="source-badge" title="Source recording">{{ insight.source_video[:40] }}{% if insight.source_video|length > 40 %}...{% endif %}</span>
+                    {% endif %}
+                    {% if insight.call_date %}
+                    <span class="date-badge">{{ insight.call_date }}</span>
+                    {% endif %}
+                </div>
+            </div>
+            <div class="insight-q">
+                <div class="q-bar-container">
+                    {% set q_percent = ((insight.q_value + 0.5) / 1.5 * 100)|int %}
+                    <div class="q-bar" style="width: {{ q_percent }}%"
+                         title="Q-value: {{ '%.3f'|format(insight.q_value) }}"></div>
+                </div>
+                <span class="q-value {% if insight.q_value > 0.3 %}text-green{% elif insight.q_value > 0 %}text-amber{% elif insight.q_value < 0 %}text-red{% else %}text-dim{% endif %}">
+                    Q: {{ '%.3f'|format(insight.q_value) }}
+                </span>
+                {% if insight.q_visits > 0 %}
+                <span class="q-visits">{{ insight.q_visits }} updates</span>
+                {% endif %}
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+{% endfor %}
+
+{% if not insights %}
+<div class="empty-state">
+    <p class="empty-icon">&#128269;</p>
+    <p>No insights found{% if query %} for "{{ query }}"{% endif %}. Upload a call recording to get started.</p>
+</div>
+{% endif %}
+{% endblock %}

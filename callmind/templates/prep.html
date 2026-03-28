@@ -1,0 +1,129 @@
+{% extends "base.html" %}
+
+{% block title %}Call Prep: {{ client_name }} — CallMind{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <div>
+        <h1>Call Prep: {{ client_name }}</h1>
+        <p class="page-sub">Pre-call intelligence briefing &mdash; {{ prep.total_insights }} insights analyzed, ranked by Q-value</p>
+    </div>
+    <div class="header-actions">
+        <a href="/client/{{ client_id }}" class="btn btn-secondary">Full Dashboard</a>
+        <a href="/" class="btn btn-ghost">Back</a>
+    </div>
+</div>
+
+{% if prep.top_insights %}
+<!-- Top Priority Insights -->
+<div class="card prep-highlight">
+    <h2 class="card-title">Key Intelligence</h2>
+    <p class="card-hint">Highest Q-value insights &mdash; these have been most predictive of deal outcomes</p>
+    <div class="highlight-list">
+        {% for insight in prep.top_insights %}
+        <div class="highlight-item">
+            <div class="highlight-rank">#{{ loop.index }}</div>
+            <div class="highlight-body">
+                <span class="type-tag {{ insight.type }}">{{ insight.type.replace('_', ' ').title() }}</span>
+                <p class="highlight-text">{{ insight.content }}</p>
+                {% if insight.quote %}
+                <blockquote class="insight-quote">&ldquo;{{ insight.quote }}&rdquo;</blockquote>
+                {% endif %}
+                {% if insight.action_point %}
+                <div class="action-point">&#9889; {{ insight.action_point }}</div>
+                {% endif %}
+            </div>
+            <div class="highlight-q">
+                <span class="q-value-lg {% if insight.q_value > 0.3 %}text-green{% elif insight.q_value > 0 %}text-amber{% else %}text-dim{% endif %}">
+                    {{ '%.3f'|format(insight.q_value) }}
+                </span>
+                <span class="q-label">Q-Value</span>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+{% endif %}
+
+<!-- Sections by insight type -->
+{% for section in prep.sections %}
+<div class="card prep-section">
+    <h2 class="section-title">
+        <span class="category-dot {{ section.type }}"></span>
+        {{ section.label }}
+        <span class="category-count">{{ section.insights|length }}</span>
+    </h2>
+
+    {% if section.type == 'pain_point' %}
+    <p class="section-guide">Address these pain points. Show you understand their challenges.</p>
+    {% elif section.type == 'objection' %}
+    <p class="section-guide">Prepare responses for these objections. Have evidence and case studies ready.</p>
+    {% elif section.type == 'decision_maker' %}
+    <p class="section-guide">Key stakeholders and their roles in the buying decision.</p>
+    {% elif section.type == 'budget' %}
+    <p class="section-guide">Budget signals and pricing sensitivity indicators.</p>
+    {% elif section.type == 'timeline' %}
+    <p class="section-guide">Urgency and timeline signals. Use these to create momentum.</p>
+    {% elif section.type == 'need' %}
+    <p class="section-guide">Explicit and implicit requirements. Map these to your solution.</p>
+    {% elif section.type == 'competitor' %}
+    <p class="section-guide">Competitive landscape. Prepare differentiators.</p>
+    {% elif section.type == 'next_step' %}
+    <p class="section-guide">Previously agreed action items. Follow up on these first.</p>
+    {% elif section.type == 'sentiment' %}
+    <p class="section-guide">Emotional tone and engagement level from previous interactions.</p>
+    {% elif section.type == 'relationship' %}
+    <p class="section-guide">Rapport and trust signals. Build on these personal connections.</p>
+    {% elif section.type == 'body_language' %}
+    <p class="section-guide">Non-verbal cues observed in video. Body posture and gestures reveal unspoken attitudes.</p>
+    {% elif section.type == 'facial_expression' %}
+    <p class="section-guide">Facial expressions detected during key moments. Micro-expressions often reveal true feelings.</p>
+    {% elif section.type == 'engagement_shift' %}
+    <p class="section-guide">Moments where visual engagement changed significantly. Use these to understand what resonates.</p>
+    {% elif section.type == 'visual_cue' %}
+    <p class="section-guide">Visual signals from the video analysis. Context clues beyond the conversation.</p>
+    {% elif section.type == 'environment' %}
+    <p class="section-guide">Environment and setup observations. Professional context signals.</p>
+    {% elif section.type == 'multimodal_confirm' %}
+    <p class="section-guide">Words and body language ALIGN. These are high-confidence signals — the prospect means what they say.</p>
+    {% elif section.type == 'multimodal_conflict' %}
+    <p class="section-guide">Words and body language CONTRADICT. Probe deeper here — the prospect may have hidden reservations.</p>
+    {% endif %}
+
+    <div class="prep-insights">
+        {% for insight in section.insights %}
+        <div class="prep-item">
+            <div class="prep-content">
+                <p>{{ insight.content }}</p>
+                {% if insight.quote %}
+                <blockquote class="insight-quote">&ldquo;{{ insight.quote }}&rdquo;</blockquote>
+                {% endif %}
+                {% if insight.action_point %}
+                <div class="action-point">&#9889; {{ insight.action_point }}</div>
+                {% endif %}
+            </div>
+            <div class="prep-meta">
+                <span class="q-value-sm {% if insight.q_value > 0.3 %}text-green{% elif insight.q_value > 0 %}text-amber{% elif insight.q_value < 0 %}text-red{% else %}text-dim{% endif %}">
+                    Q: {{ '%.3f'|format(insight.q_value) }}
+                </span>
+                <span class="confidence-sm">{{ '%.0f'|format(insight.confidence * 100) }}%</span>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+{% endfor %}
+
+{% if not prep.sections %}
+<div class="empty-state">
+    <p class="empty-icon">&#128214;</p>
+    <p>No insights available yet. Upload a call recording for this client to generate a prep briefing.</p>
+    <a href="/" class="btn btn-primary">Upload Call</a>
+</div>
+{% endif %}
+
+<div class="prep-footer">
+    <p>Q-values are updated when you record deal outcomes. The more outcomes you record, the smarter the briefing becomes.</p>
+    <p class="prep-timestamp">Generated: {{ prep.generated_at[:19] }} UTC</p>
+</div>
+{% endblock %}

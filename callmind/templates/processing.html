@@ -1,0 +1,110 @@
+{% extends "base.html" %}
+
+{% block title %}Processing — {{ client_name }}{% endblock %}
+
+{% block content %}
+<section class="hero">
+    <h1>Processing Call</h1>
+    <p class="hero-sub">Analyzing recording for <strong>{{ client_name }}</strong></p>
+</section>
+
+<div class="card card-center">
+    <div id="status-display">
+        <div class="progress-ring">
+            <svg viewBox="0 0 120 120">
+                <circle class="progress-bg" cx="60" cy="60" r="54" />
+                <circle class="progress-bar" cx="60" cy="60" r="54"
+                        id="progress-circle"
+                        stroke-dasharray="339.292"
+                        stroke-dashoffset="339.292" />
+            </svg>
+            <span class="progress-text" id="progress-text">0%</span>
+        </div>
+        <p class="status-label" id="status-label">Starting...</p>
+        <p class="status-detail" id="status-detail">Job ID: {{ job_id }}</p>
+    </div>
+
+    <div id="result-display" style="display: none;">
+        <div class="success-icon">&#10003;</div>
+        <h2>Analysis Complete</h2>
+        <p id="result-summary"></p>
+        <div class="btn-group">
+            <a href="/client/{{ client_id }}" class="btn btn-primary">View Insights</a>
+            <a href="/client/{{ client_id }}/prep" class="btn btn-secondary">Call Prep</a>
+        </div>
+    </div>
+
+    <div id="error-display" style="display: none;">
+        <div class="error-icon">&#10007;</div>
+        <h2>Processing Failed</h2>
+        <p id="error-detail" class="error-text"></p>
+        <a href="/" class="btn btn-secondary">Try Again</a>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+const jobId = "{{ job_id }}";
+const clientId = "{{ client_id }}";
+
+const statusLabels = {
+    'starting': 'Initializing pipeline...',
+    'downloading': 'Downloading video...',
+    'uploading': 'Uploading to Gemini...',
+    'analyzing': 'Running 3-channel parallel analysis (transcript + visual)...',
+    'extracting': 'Extracting insights + action points...',
+    'fusing': 'Channel 3: Cross-modal fusion...',
+    'storing': 'Storing in vector memory with Q-values...',
+    'completed': 'Complete!',
+    'failed': 'Failed',
+};
+
+function updateProgress(percent) {
+    const circle = document.getElementById('progress-circle');
+    const text = document.getElementById('progress-text');
+    const circumference = 339.292;
+    const offset = circumference - (percent / 100) * circumference;
+    circle.style.strokeDashoffset = offset;
+    text.textContent = percent + '%';
+}
+
+async function pollStatus() {
+    try {
+        const resp = await fetch(`/api/status/${jobId}`);
+        const data = await resp.json();
+
+        updateProgress(data.progress || 0);
+        document.getElementById('status-label').textContent =
+            statusLabels[data.status] || data.status;
+
+        if (data.status === 'completed') {
+            document.getElementById('status-display').style.display = 'none';
+            document.getElementById('result-display').style.display = 'block';
+            const r = data.result || {};
+            const parts = [];
+            if (r.text_insights) parts.push(`${r.text_insights} text`);
+            if (r.visual_insights) parts.push(`${r.visual_insights} visual`);
+            if (r.fusion_insights) parts.push(`${r.fusion_insights} fusion`);
+            const channelInfo = parts.length ? ` (${parts.join(' + ')})` : '';
+            document.getElementById('result-summary').textContent =
+                `Found ${r.insights_count || 0} insights${channelInfo} with action points.`;
+            return;
+        }
+
+        if (data.status === 'failed') {
+            document.getElementById('status-display').style.display = 'none';
+            document.getElementById('error-display').style.display = 'block';
+            document.getElementById('error-detail').textContent = data.error || 'Unknown error';
+            return;
+        }
+
+        setTimeout(pollStatus, 2000);
+    } catch (e) {
+        setTimeout(pollStatus, 3000);
+    }
+}
+
+pollStatus();
+</script>
+{% endblock %}

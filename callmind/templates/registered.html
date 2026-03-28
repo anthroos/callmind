@@ -1,0 +1,41 @@
+{% extends "base.html" %}
+
+{% block title %}API Key Created — CallMind{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <div>
+        <h1>Welcome, {{ username }}!</h1>
+        <p class="page-sub">Your API key has been created via Unkey</p>
+    </div>
+</div>
+
+<div class="card">
+    <h2 class="card-title">Your API Key</h2>
+    <p class="card-hint">Save this key — you won't see it again. Use it to authenticate API requests.</p>
+    <div class="api-key-box">
+        <code class="api-key">{{ api_key }}</code>
+    </div>
+    <p class="card-hint" style="margin-top: 12px;">Key ID: <code>{{ key_id }}</code></p>
+</div>
+
+<div class="card">
+    <h2 class="card-title">Quick Start</h2>
+    <p>Use your API key to upload calls programmatically:</p>
+    <pre class="code-block">
+# Upload a video file
+curl -X POST {{ request.base_url }}api/upload \
+  -H "Authorization: Bearer YOUR_API_KEY" \
+  -F "client_name=Acme Corp" \
+  -F "call_date=2025-05-04" \
+  -F "video_file=@recording.mp4"
+
+# Get insights
+curl {{ request.base_url }}api/client/acme_corp/insights \
+  -H "Authorization: Bearer YOUR_API_KEY"</pre>
+</div>
+
+<div class="header-actions" style="margin-top: 24px;">
+    <a href="/" class="btn btn-primary">Go to Dashboard</a>
+</div>
+{% endblock %}

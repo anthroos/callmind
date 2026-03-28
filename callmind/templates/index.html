@@ -1,0 +1,203 @@
+{% extends "base.html" %}
+
+{% block title %}CallMind — AI Memory Platform{% endblock %}
+
+{% block content %}
+<section class="hero">
+    <h1>Video Intelligence for Your AI Workflow</h1>
+    <p class="hero-sub">Analyze sales calls with 3 AI channels. Insights flow into your knowledge base. Q-learning ranks what closes deals.</p>
+</section>
+
+<!-- Service Status -->
+<div class="project-bar">
+    <div class="project-info">
+        <span class="project-label">Service</span>
+        <span class="project-name">CallMind Video Analysis</span>
+    </div>
+    <div class="project-goal">
+        <span class="goal-label">Output:</span>
+        <span class="goal-value">Qdrant + Q-Learning</span>
+    </div>
+</div>
+
+<!-- Upload Zone -->
+<div class="upload-zone-wrapper">
+    <form action="/upload" method="post" enctype="multipart/form-data" id="uploadForm">
+        <input type="hidden" name="call_date" value="">
+        <div class="upload-zone" id="dropZone">
+            <div class="upload-zone-content" id="dropContent">
+                <div class="upload-icon">&#9655;</div>
+                <p class="upload-title">Paste a YouTube URL or drop a video file</p>
+                <div class="upload-input-row">
+                    <input type="url" id="youtube_url" name="youtube_url"
+                           placeholder="https://www.youtube.com/watch?v=..."
+                           class="upload-url-input">
+                </div>
+                <div class="upload-divider"><span>or</span></div>
+                <label class="upload-file-label" for="video_file">
+                    Choose File
+                    <input type="file" id="video_file" name="video_file"
+                           accept="video/*,audio/*" style="display:none">
+                </label>
+                <p class="upload-hint">MP4, WebM, MP3, WAV</p>
+            </div>
+            <div class="upload-file-preview" id="filePreview" style="display:none">
+                <span class="file-icon">&#127909;</span>
+                <span class="file-name" id="fileName"></span>
+                <button type="button" class="file-remove" id="fileRemove">&times;</button>
+            </div>
+        </div>
+
+        <div class="upload-options">
+            <input type="text" name="client_name" placeholder="Client name (optional)"
+                   class="upload-client-input">
+            <button type="submit" class="btn btn-primary btn-analyze" id="analyzeBtn">
+                Analyze
+            </button>
+        </div>
+    </form>
+</div>
+
+<!-- Clients -->
+{% if clients %}
+<section class="clients-section">
+    <h2>Your Clients</h2>
+    <div class="client-grid">
+        {% for client in clients %}
+        <a href="/client/{{ client.client_id }}" class="client-card">
+            <div class="client-info">
+                <span class="client-name">{{ client.client_id.replace('_', ' ').title() }}</span>
+                <span class="client-meta">
+                    {{ client.insight_count }} insight{{ 's' if client.insight_count != 1 else '' }}
+                    {% if client.latest_call %}
+                    &middot; {{ client.latest_call }}
+                    {% endif %}
+                </span>
+            </div>
+            <span class="q-badge {% if client.avg_q_value > 0.3 %}q-high{% elif client.avg_q_value > 0 %}q-mid{% else %}q-low{% endif %}">
+                Q: {{ '%.2f'|format(client.avg_q_value) }}
+            </span>
+        </a>
+        {% endfor %}
+    </div>
+</section>
+{% endif %}
+
+<!-- How It Works -->
+<section class="how-it-works">
+    <h2>How It Works</h2>
+    <div class="grid-3">
+        <div class="step">
+            <div class="step-num">1</div>
+            <h3>Upload</h3>
+            <p>Send a video via UI or API. CallMind downloads, uploads to Gemini, runs 3-channel analysis in parallel.</p>
+        </div>
+        <div class="step">
+            <div class="step-num">2</div>
+            <h3>Insights + Actions</h3>
+            <p>Text, body language, and cross-modal fusion produce structured insights with concrete action points.</p>
+        </div>
+        <div class="step">
+            <div class="step-num">3</div>
+            <h3>Learn from Outcomes</h3>
+            <p>Record deal results. Q-values update. Your AI agent pulls the highest-ranked insights for next call prep.</p>
+        </div>
+    </div>
+</section>
+
+<!-- Architecture -->
+<section class="blocks-section">
+    <h2>How It Plugs In</h2>
+    <p class="blocks-sub">CallMind is one service in your AI stack. Video in, structured insights out.</p>
+    <div class="arch-flow">
+        <div class="arch-col">
+            <div class="arch-label">Input</div>
+            <div class="block-card connected">
+                <div class="block-header">
+                    <span class="block-icon">&#127909;</span>
+                    <span class="block-status on">Live</span>
+                </div>
+                <h3>Video / Audio</h3>
+                <p>YouTube URL or file upload. 3-channel multimodal analysis.</p>
+                <div class="block-meta">Gemini 2.5 Flash</div>
+            </div>
+        </div>
+        <div class="arch-arrow">&#8594;</div>
+        <div class="arch-col">
+            <div class="arch-label">Processing</div>
+            <div class="block-card connected">
+                <div class="block-header">
+                    <span class="block-icon">&#129504;</span>
+                    <span class="block-status on">Live</span>
+                </div>
+                <h3>CallMind Engine</h3>
+                <p>Transcript + Visual + Fusion. Action points. Q-learning ranking.</p>
+                <div class="block-meta">Qdrant + FastEmbed</div>
+            </div>
+        </div>
+        <div class="arch-arrow">&#8594;</div>
+        <div class="arch-col">
+            <div class="arch-label">Output</div>
+            <div class="block-card connected">
+                <div class="block-header">
+                    <span class="block-icon">&#128273;</span>
+                    <span class="block-status on">Live</span>
+                </div>
+                <h3>API / MCP</h3>
+                <p>REST API with Unkey auth. Connect Claude Code, CRM, any AI agent.</p>
+                <div class="block-meta">Powered by Unkey</div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- API Access -->
+<section class="api-section">
+    <div class="card">
+        <h2 class="card-title">API Access</h2>
+        <p class="card-hint">Connect your tools programmatically. Powered by <strong>Unkey</strong>.</p>
+        <form action="/register" method="post" class="register-form">
+            <input type="text" name="username" required placeholder="Your name or company" class="form-input">
+            <button type="submit" class="btn btn-secondary">Get API Key</button>
+        </form>
+    </div>
+</section>
+
+<script>
+const dropZone = document.getElementById('dropZone');
+const fileInput = document.getElementById('video_file');
+const urlInput = document.getElementById('youtube_url');
+const filePreview = document.getElementById('filePreview');
+const fileName = document.getElementById('fileName');
+const fileRemove = document.getElementById('fileRemove');
+const dropContent = document.getElementById('dropContent');
+
+['dragenter', 'dragover'].forEach(e => {
+    dropZone.addEventListener(e, ev => { ev.preventDefault(); dropZone.classList.add('drag-over'); });
+});
+['dragleave', 'drop'].forEach(e => {
+    dropZone.addEventListener(e, ev => { ev.preventDefault(); dropZone.classList.remove('drag-over'); });
+});
+dropZone.addEventListener('drop', ev => {
+    const files = ev.dataTransfer.files;
+    if (files.length) { fileInput.files = files; showFile(files[0]); }
+});
+fileInput.addEventListener('change', () => {
+    if (fileInput.files.length) showFile(fileInput.files[0]);
+});
+fileRemove.addEventListener('click', () => {
+    fileInput.value = '';
+    filePreview.style.display = 'none';
+    dropContent.style.display = '';
+});
+
+function showFile(f) {
+    fileName.textContent = f.name + ' (' + (f.size / 1e6).toFixed(1) + ' MB)';
+    filePreview.style.display = 'flex';
+    dropContent.style.display = 'none';
+    urlInput.value = '';
+}
+
+document.querySelector('input[name="call_date"]').value = new Date().toISOString().split('T')[0];
+</script>
+{% endblock %}
