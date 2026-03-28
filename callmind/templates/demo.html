@@ -1,0 +1,139 @@
+{% extends "base.html" %}
+
+{% block title %}CallMind — Demo{% endblock %}
+
+{% block content %}
+<section class="hero">
+    <h1>CallMind</h1>
+    <p class="hero-sub">Video Intelligence with Q-Learning for Sales</p>
+</section>
+
+<!-- Problem -->
+<div class="demo-section">
+    <h2>The Problem</h2>
+    <div class="demo-grid">
+        <div class="demo-card">
+            <div class="demo-num">80%</div>
+            <p>of sales call insights are lost within 24 hours</p>
+        </div>
+        <div class="demo-card">
+            <div class="demo-num">0%</div>
+            <p>of tools read body language from video calls</p>
+        </div>
+        <div class="demo-card">
+            <div class="demo-num">0</div>
+            <p>feedback loops that learn what actually closes deals</p>
+        </div>
+    </div>
+</div>
+
+<!-- Architecture -->
+<div class="demo-section">
+    <h2>Architecture</h2>
+    <div class="demo-arch">
+        <div class="demo-arch-row">
+            <div class="demo-arch-box demo-agent">
+                <div class="demo-arch-label">AI Agent</div>
+                <strong>Claude Code</strong>
+                <p>Orchestrates everything</p>
+            </div>
+        </div>
+        <div class="demo-arch-arrows">&#8595; &nbsp; &#8595; &nbsp; &#8595;</div>
+        <div class="demo-arch-row">
+            <div class="demo-arch-box">
+                <div class="demo-arch-label">Block 1</div>
+                <strong>CRM</strong>
+                <p>Clients, deals, pipeline</p>
+            </div>
+            <div class="demo-arch-box demo-highlight">
+                <div class="demo-arch-label">Block 2</div>
+                <strong>CallMind</strong>
+                <p>Video analysis<br>3 AI channels</p>
+            </div>
+            <div class="demo-arch-box">
+                <div class="demo-arch-label">Block 3</div>
+                <strong>Email</strong>
+                <p>Gmail integration</p>
+            </div>
+        </div>
+        <div class="demo-arch-arrows">&#8595; &nbsp; &#8595; &nbsp; &#8595;</div>
+        <div class="demo-arch-row">
+            <div class="demo-arch-box demo-core">
+                <div class="demo-arch-label">Core</div>
+                <strong>Qdrant + Q-Learning</strong>
+                <p>Vector memory that learns from outcomes</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- 3 Channels -->
+<div class="demo-section">
+    <h2>3-Channel Parallel Analysis</h2>
+    <div class="demo-grid">
+        <div class="demo-card">
+            <div class="demo-icon">&#128172;</div>
+            <h3>Channel 1: Transcript</h3>
+            <p>What they <strong>said</strong><br>Pain points, objections, budget signals, timelines</p>
+        </div>
+        <div class="demo-card">
+            <div class="demo-icon">&#128064;</div>
+            <h3>Channel 2: Visual</h3>
+            <p>How they <strong>behaved</strong><br>Body language, micro-expressions, engagement</p>
+        </div>
+        <div class="demo-card demo-fusion">
+            <div class="demo-icon">&#9889;</div>
+            <h3>Channel 3: Fusion</h3>
+            <p>Where they <strong>contradict</strong><br>"Said yes but crossed arms and looked away"</p>
+        </div>
+    </div>
+</div>
+
+<!-- Q-Learning -->
+<div class="demo-section">
+    <h2>Q-Learning: Memory That Learns</h2>
+    <div class="demo-qlearn">
+        <div class="demo-formula">
+            Q<sub>new</sub> = Q<sub>old</sub> + 0.25 &times; reward
+        </div>
+        <div class="demo-grid">
+            <div class="demo-card">
+                <div class="demo-q-val q-positive">Q: 0.375</div>
+                <p><strong>Deal Won</strong><br>Insights that predicted success rise</p>
+            </div>
+            <div class="demo-card">
+                <div class="demo-q-val q-zero">Q: 0.000</div>
+                <p><strong>New Client</strong><br>No outcome data yet</p>
+            </div>
+            <div class="demo-card">
+                <div class="demo-q-val q-negative">Q: -0.125</div>
+                <p><strong>Deal Lost</strong><br>Misleading signals get demoted</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Sponsors -->
+<div class="demo-section">
+    <h2>Built With</h2>
+    <div class="demo-grid">
+        <div class="demo-card">
+            <h3>Gemini 2.5 Flash</h3>
+            <p>Native multimodal video understanding. 3 parallel queries on one upload.</p>
+        </div>
+        <div class="demo-card">
+            <h3>Unkey</h3>
+            <p>API key management. Register, verify, authenticate — all via v2 REST.</p>
+        </div>
+        <div class="demo-card">
+            <h3>DigitalOcean</h3>
+            <p>Production deployment. Docker Compose: Qdrant + FastAPI on a Droplet.</p>
+        </div>
+    </div>
+</div>
+
+<div class="demo-cta">
+    <a href="/" class="btn btn-primary">Try Live Demo &rarr;</a>
+    <a href="https://github.com/anthroos/callmind" class="btn btn-secondary" target="_blank">GitHub</a>
+</div>
+{% endblock %}

@@ -99,6 +99,12 @@ def _unkey_verify(api_key: str) -> dict | None:
 # --- Routes ---
 
 
+@app.get("/demo", response_class=HTMLResponse)
+async def demo(request: Request):
+    """Demo presentation page."""
+    return templates.TemplateResponse(request=request, name="demo.html")
+
+
 @app.get("/", response_class=HTMLResponse)
 async def index(request: Request):
     """Landing page: upload form + list of clients."""
