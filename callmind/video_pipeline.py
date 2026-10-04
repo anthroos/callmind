@@ -6,10 +6,9 @@ Flow: video/URL → download → Gemini multimodal (transcript + visual) → ins
 import json
 import logging
 import re
-import tempfile
 import time
 import uuid
-from concurrent.futures import ThreadPoolExecutor, as_completed
+from concurrent.futures import ThreadPoolExecutor
 from pathlib import Path
 from typing import Any
 
@@ -94,6 +93,17 @@ def _upload_and_wait(file_path: Path):
 
     logger.info("Video ready for analysis (waited %ds)", waited)
     return video_file
+
+
+def _delete_gemini_file(video_file) -> None:
+    """Best-effort removal of an uploaded video from Gemini Files."""
+    from google import genai
+
+    try:
+        genai.Client(api_key=GEMINI_API_KEY).files.delete(name=video_file.name)
+        logger.info("Deleted video from Gemini Files: %s", video_file.name)
+    except Exception as e:
+        logger.warning("Could not delete Gemini file %s: %s", video_file.name, e)
 
 
 # --- Gemini transcription ---
@@ -540,6 +550,9 @@ def process_video(
         # Save transcript
         transcript_path = UPLOAD_DIR / f"{job_id}_transcript.txt"
         transcript_path.write_text(transcript)
+
+        # The video is no longer needed on Gemini's side: delete it right away.
+        _delete_gemini_file(video_file)
 
         _update_job(job_id, status="extracting", progress=65)
 

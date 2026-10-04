@@ -6,7 +6,7 @@
 <div class="page-header">
     <div>
         <h1>Call Prep: {{ client_name }}</h1>
-        <p class="page-sub">Pre-call intelligence briefing &mdash; {{ prep.total_insights }} insights analyzed, ranked by Q-value</p>
+        <p class="page-sub">Pre-call intelligence briefing &mdash; {{ prep.total_insights }} insights analyzed</p>
     </div>
     <div class="header-actions">
         <a href="/client/{{ client_id }}" class="btn btn-secondary">Full Dashboard</a>
@@ -18,7 +18,7 @@
 <!-- Top Priority Insights -->
 <div class="card prep-highlight">
     <h2 class="card-title">Key Intelligence</h2>
-    <p class="card-hint">Highest Q-value insights &mdash; these have been most predictive of deal outcomes</p>
+    <p class="card-hint">Highest-confidence insights from your recorded calls</p>
     <div class="highlight-list">
         {% for insight in prep.top_insights %}
         <div class="highlight-item">
@@ -32,12 +32,6 @@
                 {% if insight.action_point %}
                 <div class="action-point">&#9889; {{ insight.action_point }}</div>
                 {% endif %}
-            </div>
-            <div class="highlight-q">
-                <span class="q-value-lg {% if insight.q_value > 0.3 %}text-green{% elif insight.q_value > 0 %}text-amber{% else %}text-dim{% endif %}">
-                    {{ '%.3f'|format(insight.q_value) }}
-                </span>
-                <span class="q-label">Q-Value</span>
             </div>
         </div>
         {% endfor %}
@@ -103,9 +97,6 @@
                 {% endif %}
             </div>
             <div class="prep-meta">
-                <span class="q-value-sm {% if insight.q_value > 0.3 %}text-green{% elif insight.q_value > 0 %}text-amber{% elif insight.q_value < 0 %}text-red{% else %}text-dim{% endif %}">
-                    Q: {{ '%.3f'|format(insight.q_value) }}
-                </span>
                 <span class="confidence-sm">{{ '%.0f'|format(insight.confidence * 100) }}%</span>
             </div>
         </div>
@@ -123,7 +114,6 @@
 {% endif %}
 
 <div class="prep-footer">
-    <p>Q-values are updated when you record deal outcomes. The more outcomes you record, the smarter the briefing becomes.</p>
     <p class="prep-timestamp">Generated: {{ prep.generated_at[:19] }} UTC</p>
 </div>
 {% endblock %}

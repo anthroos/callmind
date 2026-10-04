@@ -25,16 +25,13 @@ EMBEDDING_DIM: int = int(os.environ.get("CALLMIND_EMBEDDING_DIM", "384"))
 UPLOAD_DIR: Path = Path(os.environ.get("CALLMIND_UPLOAD_DIR", "./uploads"))
 UPLOAD_DIR.mkdir(parents=True, exist_ok=True)
 
-# --- Q-learning defaults (same as OpenExp) ---
-Q_INIT: float = 0.0
-Q_ALPHA: float = 0.25
-Q_FLOOR: float = -0.5
-Q_CEILING: float = 1.0
-
 # --- Unkey ---
 UNKEY_ROOT_KEY: str = os.environ.get("UNKEY_ROOT_KEY", "")
 UNKEY_API_ID: str = os.environ.get("UNKEY_API_ID", "")
 
 # --- App ---
-APP_HOST: str = os.environ.get("CALLMIND_HOST", "0.0.0.0")
+# Local-only by default. Docker sets CALLMIND_HOST=0.0.0.0 inside the container and
+# publishes the port on 127.0.0.1 only (see docker-compose.yml).
+APP_HOST: str = os.environ.get("CALLMIND_HOST", "127.0.0.1")
 APP_PORT: int = int(os.environ.get("CALLMIND_PORT", "8000"))
+APP_RELOAD: bool = os.environ.get("CALLMIND_RELOAD", "").lower() in ("1", "true", "yes")

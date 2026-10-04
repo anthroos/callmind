@@ -1,6 +1,6 @@
 # Callmind
 
-Video intelligence with Q-learning — analyze sales calls with 3-channel Gemini multimodal analysis, store insights in Qdrant with Q-learning feedback
+Video call intelligence — analyze call recordings with 3-channel Gemini multimodal analysis and search the insights in Qdrant
 
 ## Installation
 
@@ -10,7 +10,7 @@ npx shipables install callmind
 
 ## Usage
 
-Describe how the AI agent uses this skill.
+See `SKILL.md`: upload a recording via the API, poll the job, read the insights.
 
 ## License
 

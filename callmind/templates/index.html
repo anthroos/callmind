@@ -5,7 +5,7 @@
 {% block content %}
 <section class="hero">
     <h1>Video Intelligence for Your AI Workflow</h1>
-    <p class="hero-sub">Analyze sales calls with 3 AI channels. Insights flow into your knowledge base. Q-learning ranks what closes deals.</p>
+    <p class="hero-sub">Analyze sales calls with 3 AI channels. Insights flow into your knowledge base. Get a prep briefing for the next call.</p>
 </section>
 
 <!-- Service Status -->
@@ -16,7 +16,7 @@
     </div>
     <div class="project-goal">
         <span class="goal-label">Output:</span>
-        <span class="goal-value">Qdrant + Q-Learning</span>
+        <span class="goal-value">Qdrant vector memory</span>
     </div>
 </div>
 
@@ -74,9 +74,6 @@
                     {% endif %}
                 </span>
             </div>
-            <span class="q-badge {% if client.avg_q_value > 0.3 %}q-high{% elif client.avg_q_value > 0 %}q-mid{% else %}q-low{% endif %}">
-                Q: {{ '%.2f'|format(client.avg_q_value) }}
-            </span>
         </a>
         {% endfor %}
     </div>
@@ -99,8 +96,8 @@
         </div>
         <div class="step">
             <div class="step-num">3</div>
-            <h3>Learn from Outcomes</h3>
-            <p>Record deal results. Q-values update. Your AI agent pulls the highest-ranked insights for next call prep.</p>
+            <h3>Prep the Next Call</h3>
+            <p>Search every insight semantically and get a briefing grouped by pain points, objections and non-verbal signals.</p>
         </div>
     </div>
 </section>
@@ -131,7 +128,7 @@
                     <span class="block-status on">Live</span>
                 </div>
                 <h3>CallMind Engine</h3>
-                <p>Transcript + Visual + Fusion. Action points. Q-learning ranking.</p>
+                <p>Transcript + Visual + Fusion. Action points. Semantic search.</p>
                 <div class="block-meta">Qdrant + FastEmbed</div>
             </div>
         </div>

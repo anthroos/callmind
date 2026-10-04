@@ -1,7 +1,7 @@
 [project]
 name = "callmind"
-version = "0.1.0"
-description = "AI Sales Memory That Learns — upload call recordings, extract insights, Q-learning ranks what matters"
+version = "0.2.0"
+description = "Video call intelligence: transcript, body language and emotion signals from call recordings, via Gemini multimodal"
 readme = "README.md"
 requires-python = ">=3.11"
 license = {text = "MIT"}
