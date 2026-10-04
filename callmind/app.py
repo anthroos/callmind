@@ -6,12 +6,10 @@ Routes:
     POST /upload                   → Accept video file or YouTube URL
     GET  /client/{client_id}       → Client dashboard (all insights, Q-values)
     GET  /client/{client_id}/prep  → Call prep briefing
-    POST /client/{client_id}/outcome → Record deal outcome (Q-learning reward)
     GET  /api/status/{job_id}      → Processing status
     POST /api/upload               → API upload (requires Unkey API key)
 """
 
-import asyncio
 import logging
 import shutil
 import uuid
@@ -19,11 +17,11 @@ from pathlib import Path
 
 import uvicorn
 from fastapi import BackgroundTasks, FastAPI, File, Form, Header, Request, UploadFile
-from fastapi.responses import HTMLResponse, JSONResponse, RedirectResponse
+from fastapi.responses import HTMLResponse, JSONResponse
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
 
-from .config import APP_HOST, APP_PORT, UNKEY_API_ID, UNKEY_ROOT_KEY, UPLOAD_DIR
+from .config import APP_HOST, APP_PORT, APP_RELOAD, UNKEY_API_ID, UNKEY_ROOT_KEY, UPLOAD_DIR
 from . import memory
 from . import video_pipeline
 
@@ -37,7 +35,7 @@ logger = logging.getLogger(__name__)
 
 app = FastAPI(
     title="CallMind",
-    description="AI Sales Memory That Learns",
+    description="Video call intelligence: transcript, body language and emotion signals",
     version="0.1.0",
 )
 
@@ -51,7 +49,6 @@ async def startup():
     """Ensure Qdrant collection exists on startup."""
     logger.info("CallMind starting up...")
     memory.ensure_collection()
-    memory.rebuild_q_cache()
     if UNKEY_ROOT_KEY:
         logger.info("Unkey auth enabled (API ID: %s)", UNKEY_API_ID)
     else:
@@ -100,12 +97,6 @@ def _unkey_verify(api_key: str) -> dict | None:
 # --- Routes ---
 
 
-@app.get("/demo", response_class=HTMLResponse)
-async def demo(request: Request):
-    """Demo presentation page."""
-    return templates.TemplateResponse(request=request, name="demo.html")
-
-
 @app.get("/", response_class=HTMLResponse)
 async def index(request: Request):
     """Landing page: upload form + list of clients."""
@@ -130,7 +121,7 @@ async def register(request: Request, username: str = Form(...)):
         })
     except Exception as e:
         logger.exception("Unkey registration failed: %s", e)
-        return JSONResponse(status_code=500, content={"error": str(e)})
+        return JSONResponse(status_code=500, content={"error": "Registration failed"})
 
 
 @app.post("/upload")
@@ -342,12 +333,8 @@ async def client_dashboard(request: Request, client_id: str, q: str = ""):
             by_type[t] = []
         by_type[t].append(insight)
 
-    q_values = [i["q_value"] for i in insights]
     stats = {
         "total": len(insights),
-        "avg_q": round(sum(q_values) / len(q_values), 3) if q_values else 0,
-        "max_q": round(max(q_values), 3) if q_values else 0,
-        "min_q": round(min(q_values), 3) if q_values else 0,
         "types": len(by_type),
     }
 
@@ -363,7 +350,7 @@ async def client_dashboard(request: Request, client_id: str, q: str = ""):
 
 @app.get("/client/{client_id}/prep", response_class=HTMLResponse)
 async def call_prep(request: Request, client_id: str):
-    """Pre-call briefing: top insights ranked by Q-value."""
+    """Pre-call briefing: insights grouped by category."""
     prep = memory.get_call_prep(client_id)
 
     return templates.TemplateResponse(request=request, name="prep.html", context={
@@ -371,18 +358,6 @@ async def call_prep(request: Request, client_id: str):
         "client_name": client_id.replace("_", " ").title(),
         "prep": prep,
     })
-
-
-@app.post("/client/{client_id}/outcome")
-async def record_outcome(
-    request: Request,
-    client_id: str,
-    outcome: str = Form(...),
-    reward: float = Form(...),
-):
-    """Record a deal outcome and update Q-values for all client insights."""
-    result = memory.update_q_values(client_id, outcome, reward)
-    return RedirectResponse(url=f"/client/{client_id}", status_code=303)
 
 
 # --- Entry point ---
@@ -393,7 +368,7 @@ def main():
         "callmind.app:app",
         host=APP_HOST,
         port=APP_PORT,
-        reload=True,
+        reload=APP_RELOAD,
     )
 
 

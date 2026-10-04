@@ -185,7 +185,7 @@
 {% block content %}
 <div class="explore-hero">
     <h1>Knowledge Base Explorer</h1>
-    <p>Search across all sources — video calls, CRM, email. Ranked by Q-value.</p>
+    <p>Search across all analyzed calls. Ranked by semantic similarity.</p>
 </div>
 
 <div class="kb-stats">
@@ -196,10 +196,6 @@
     <div class="kb-stat">
         <div class="kb-stat-value">{{ stats.total_clients }}</div>
         <div class="kb-stat-label">Clients</div>
-    </div>
-    <div class="kb-stat">
-        <div class="kb-stat-value">{{ '%.2f'|format(stats.avg_q_value) }}</div>
-        <div class="kb-stat-label">Avg Q-Value</div>
     </div>
     <div class="kb-stat">
         <div class="kb-stat-value">{{ stats.types|length }}</div>
@@ -219,16 +215,12 @@
 {% if results %}
 <div class="results">
     <p style="color: var(--text-dim); font-size: 13px; margin-bottom: 12px;">
-        {{ results|length }} results for "{{ query }}" — ranked by hybrid score (60% semantic + 40% Q-value)
+        {{ results|length }} results for "{{ query }}" — ranked by semantic similarity
     </p>
     {% for r in results %}
     <div class="result-card">
         <div class="result-scores">
-            <div class="result-q {% if r.q_value > 0 %}positive{% elif r.q_value < 0 %}negative{% else %}neutral{% endif %}">
-                {{ '%.2f'|format(r.q_value) }}
-            </div>
             <div class="result-vec">sim: {{ '%.2f'|format(r.vector_score) }}</div>
-            <div class="result-hybrid">H: {{ '%.2f'|format(r.hybrid_score) }}</div>
         </div>
         <div class="result-body">
             <div class="result-content">{{ r.content }}</div>

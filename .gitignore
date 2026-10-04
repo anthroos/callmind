@@ -14,7 +14,7 @@ venv/
 
 # Uploads and data
 uploads/
-q_cache.json
+
 
 # IDE
 .idea/
